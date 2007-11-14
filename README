@@ -1,0 +1,97 @@
+WHAT:
+=====
+
+Tool to find identical sets of files based on their hashes.
+
+Name: ua (from Hungarian UgyanAz).
+
+LICENSE:
+=======
+
+LGPL. http://www.gnu.org/licenses/lgpl-3.0.txt
+
+BUILD:
+======
+
+This is what the supplied Makefile does.
+
+Simply:
+
+  $ g++ -o ua -O3 -I. ua.cc filei.cc -lcrypto 
+
+or
+
+  $ g++ -o ua -O3 -I. -D__NOHASH ua.cc filei.cc -lcrypto 
+
+
+The tool uses openssl's md5 (libcrypto). The tool also uses the POSIX 
+getopt lib.
+
+The tool may use sorted (tree based) or hashed data structures. By default,
+hashed ones preferred. This can be overridden by specifying __NOHASH.
+Also it can be passed to make as
+
+  $ make DEFINES="-D__NOHASH"
+
+
+INSTALL:
+========
+
+  $ make
+  $ sudo make install
+
+  Of you want libraries as well,
+
+  $ make all
+  $ sudo make install
+
+  Or if you do not like /usr/local as the location
+
+  $ sudo make install PREFIX=/opt
+
+  To clean up,
+
+  $ make clean
+
+  To uninstall,
+
+  $ make uninstall
+
+  The provided Makefile understands the following variables:
+
+  PREFIX:   root of install (default /usr/local)
+  CXX:      C++ compiler (default g++)
+  CLFAGS:   compiler flags (default -O3 -Wall)
+  LDFLAGS:  linker flags (default -lcrypto)
+  DEFINES:  preprocessor definitions (default "")
+
+
+FILES:
+======
+
+  filei.h:  header with class and function definitions, can be used
+            in other tools
+
+  filei.cc: implementation of stuff defined in filei.h, can be included
+            in both static and dynamic libraries
+
+  ua.cc:    main
+
+
+DOCUMENTATION:
+==============
+
+  filei.h extensively documents the interface. Sparse comments in the cc
+  files help in understanding the code.
+
+
+USAGE:
+======
+
+   After install, see the man page, 
+
+   $ man ua
+
+   Or read the online help
+
+   $ ua -vh

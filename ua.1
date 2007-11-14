@@ -1,0 +1,163 @@
+.TH UA "1" "November 2007" "ua 1.0" "User Commands"
+.SH NAME
+.TP
+\fBua\fR \-
+find identical sets of files (comes from the Hungarian word 
+\fBu\fRgyan\fBa\fRz \- meaning "the same")
+
+.SH SYNOPSIS
+.B ua
+[\fIOPTION\fR]... [\fIFILE\fR]...
+
+.SH DESCRIPTION
+
+Given a list of files, \fBua\fR finds sets comprised of identical ones. 
+\fBua\fR was designed to take input from \fBfind\fR or \fBls\fR and produce
+output that is trivial to process by line oriented tools, such as 
+\fBsed\fR, \fBxargs\fR, \fBawk\fR, \fBwc\fR, \fBgrep\fR etc.
+For example, counting the number of sets of duplicates, simply:
+.IP
+$ \fBfind\fR ~ -type f | \fBua\fR - | \fBwc\fR -l
+.PP
+or to find the largest such set:
+.IP
+$ \fBfind\fR ~ -type f | \fBua\fR - | \\
+.br
+  \fBawk\fR '{if (NF>M) { M=NF;S=$0;}} END {print(S);}'
+.PP
+
+.SH OPTIONS
+.TP
+\fB\-i\fR
+ignore letter case
+.TP
+\fB\-w\fR
+ignore white spaces
+.TP
+\fB\-n\fR
+do not ask the file system for file size
+.TP
+\fB\-v\fR
+verbose output (prints stuff to stderr), verbose help
+.TP
+\fB\-m\fR \fImax\fR
+consider only the first \fImax\fR bytes in the hash
+.TP
+\fB\-2\fR
+perform two stage hashing, first hash on the prefix of size
+set with \fB\-m\fR and throw away candidates with unique
+prefix hashes
+.TP
+\fB\-s\fR \fIsep\fR
+separator (default SPACE)
+.TP
+\fB\-p\fR
+also print the hash value
+.TP
+\fB\-b\fR \fIsize\fR
+set internal buffer size (default 1024)
+.TP
+\fB\-h\fR
+this help (\fB-vh\fR more verbose help)
+.TP
+\fB\-\fR
+read file names from stdin, where each line contains one file name (this 
+must also be the last option in the list)
+
+.SH OUTPUT
+Each line of the output represents one set of identical files. The columns
+are the path names separated by \fIsep\fR (\fB\-s\fR\fIsep\fR). When \fB\-p\fR
+set, the first column will be the hash value. Remember that if \fB\-i\fR or
+\fB\-w\fR are set, the hash value will likely be different from what 
+\fBmd5sum\fR would give.
+
+.SH ALGORITHM
+Calculation proceeds in three steps:
+.IP
+\fB1\fR. Ask the FS for file size and throw away files with unique byte counts.
+.IP
+\fB2\fR. If so requested (\fB\-2\fR), calculate a fast hash on a fixed-size
+prefix (given by \fB\-m\fR) of the files with the same byte count 
+and throw away the ones with unique prefix hash values
+.IP
+\fB3\fR. The still matching files will go through a full MD5 hash; the files 
+with the same hash will be deemed identical
+.PP
+\fB\-w\fR implies \fB\-n\fR, since the byte count is irrelevant information
+in this case. The two-stage hashing algorithm first calculates identical sets
+considering only a fixed-size prefix (thus the \fB\-2\fR option requires
+\fB\-m\fR) and then from these sets calculates the final result.
+This can be much faster when there are many files with the same size
+or when comparing files with whitespaces ignored. When \fB\-w\fR and 
+\fB\-m\fR \fImax\fR are both set, the \fImax\fR refers to the first 
+\fImax\fR non-white space characters.
+
+.SH EXAMPLES
+.TP
+\fBGet help on usage\fR:
+.IP
+$ \fBua\fR -h
+.br
+$ \fBua\fR -vh
+.PP
+
+.TP
+\fBFind identical files in the current directory\fR:
+.IP
+$ \fBua\fR *
+.br
+$ \fBls\fR | \fBua\fR -p -
+.PP
+In the first case, the files are read from the command line, while in
+the second the file names are read from the standard input. The letter
+one also prints the hashcode.
+
+
+.TP
+\fBCompare text files\fR:
+.IP
+$ \fBua\fR -iwvb256 f1.txt f2.txt f3.txt
+.PP
+Compares the three files ignoring letter case and white spaces.
+Intermediate steps will be reported on stderr (\fB\-v\fR). The \fB\-w\fR
+implies \fB\-n\fR, thus file sizes are not grouped. The internal buffer 
+size is reduced to 256, since the whitespaces will cause data to be moved
+in the buffer.
+
+
+.TP
+\fBCalculate the number of identical files under home\fR:
+.IP
+$ \fBfind\fR ~ -type f | \fBua\fR -2m256 - | \fBwc\fR -l
+.PP
+Considering the large number of files, the calculation will be
+performed with a two stage hash (\fB\-2\fR).  Only files that pass the
+256 byte prefix hash will be fully hashed.
+
+
+.TP
+\fBFind identical header files\fR:
+.IP
+$ \fBfind\fR /usr/include -name '*.h' | \fBua\fR -b256 -wm256 -2s, -
+.PP
+Ignore white spaces \fB\-w\fR (thus use a smaller buffer \fB\-b\fR\fI256\fR).
+Perform the calculation in two stages (\fB\-2\fR),
+first cluster based on the whitespace-free first 256 characters 
+(\fB\-m\fR\fI256\fR). Also, separate the identical files in the output
+by commas (\fB\-s\fR\fI,\fR).
+
+.SH VERSION
+1.0,  \fBua\fR -h will tell you whether you have the hashed or the tree
+version.
+
+.SH AUTHOR
+\(co Istv\*'an T. Hern\*'adv\*"olgyi, EU.EDGE LLC, 2007
+.br
+<istvan.hernadvolgyi@gmail.com>
+.SH LICENSE
+This is free software.  You may redistribute copies of it under the terms of
+the GNU LESSER GENERAL PUBLIC LICENSE <http://www.gnu.org/licenses/lgpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+.SH "SEE ALSO"
+
+\fIMD5\fR(3), \fImd5sum\fR(1), \fIfind\fR(1)
