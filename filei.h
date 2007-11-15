@@ -42,7 +42,10 @@
  * Contains the path name and the corresponding md5 hash. 
  */
 class filei {
+
    private:
+      // a shared buffer
+      // used for internal calculations, but can be overridden
       static char _buffer[32768];
 
       std::string _path; // path name
@@ -52,9 +55,11 @@ class filei {
       // calculate hash
       void calc(bool ic, bool iw, int bs, int max) throw(const char*); 
 
+      // return buffer 
       static char* gbuff(size_t) { return _buffer; }
-      static int buffc() { return 32768; }
 
+      // return buffer capacity
+      static int buffc() { return 32768; }
 
    public:
 
@@ -96,6 +101,11 @@ class filei {
       const size_t h() const { return _h; }
 
 
+      /** Get file size from the file system.
+        * @param path absolute or relative path
+        * @return file size in bytes
+        * @throws an exception if status cannot be determined.
+        */
       static off_t fsize(const std::string& path) throw(const char*);
 
       /** Functor for hashed containers.
@@ -121,7 +131,6 @@ class filei {
          bool operator()(const filei& fi1, const filei& fi2) const;
       };
 
-
       /** Functor for containers.
         */
       struct md5eq {
@@ -141,16 +150,24 @@ class filei {
 
       /** Function that gets work buffer.
        * The size_t argument is the requested capacity.
+       * By default, it is set to filei::gbuff, which returns
+       * a static (shared) buffer of size 32K (regardless of the
+       * requested capacity).
        */
       static char* (*_gbuff)(size_t);
 
-      /** Function that tells work buffer capacity. */
+      /** Function that tells work buffer capacity.
+        * The function should tell the capacity of the
+        * buffer returned by (*_gbuff)(size_t).
+        */
       static int (*_buffc)();
 
-      /** Function that releases work buffer. */
+      /** Function that releases work buffer.
+        * This function will be called when a calculation
+        * has finished. The argument is the address of the work buffer
+        * returned by (*_gbuff)(size_t).
+        */
       static void (*_relbuff)(char*);
-     
-
 };
 
 
