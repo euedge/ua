@@ -78,7 +78,7 @@ void filei::calc(bool ic, bool iw, int bn, int max) throw(const char*) {
    const char* error = 0;
 
    char* buffer = (*_gbuff)(bn);   // get buffer
-   bn = std::max(bn,(*_buffc)());  // get buffer size
+   bn = std::min(bn,(*_buffc)());  // get buffer size
 
    int tot = 0;
 
