@@ -1,11 +1,35 @@
+/*
+ * The contents of this file are subject to the Mozilla Public License
+ * Version 1.1 (the "License"); you may not use this file except in
+ * compliance with the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ * 
+ * Software distributed under the License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ * License for the specific language governing rights and limitations
+ * under the License.
+ * 
+ * The Original Code was developed for an EU.EDGE internal project and
+ * is made available according to the terms of this license.
+ * 
+ * The Initial Developer of the Original Code is Istvan T. Hernadvolgyi,
+ * EU.EDGE LLC.
+ *
+ * Portions created by EU.EDGE LLC are Copyright (C) EU.EDGE LLC.
+ * All Rights Reserved.
+ *
+ * Alternatively, the contents of this file may be used under the terms
+ * of the GNU General Public License (the "GPL"), in which case the
+ * provisions of GPL are applicable instead of those above.  If you wish
+ * to allow use of your version of this file only under the terms of the
+ * GPL and not to allow others to use your version of this file under the
+ * License, indicate your decision by deleting the provisions above and
+ * replace them with the notice and other provisions required by the GPL.
+ * If you do not delete the provisions above, a recipient may use your
+ * version of this file under either the License or the GPL.
+ */
+
 // FILE COMPARISONS BY MD5 HASH VALUE - HEADER
-//
-// (c) Dr. I. T. Hernadvolgyi, EU.EDGE LLC, 2007
-//
-// THIS IS FREE SOFTWARE 
-//
-// FOR DETAILS SEE http://www.gnu.org/licenses/lgpl-3.0.txt
-//
 //
  
 #if !defined(_FILEI_H_)
@@ -20,6 +44,12 @@
 #if __GNUC__ >= 3
 #define __UA_USEHASH
 #endif
+#endif
+
+// default work buffer size
+//
+#if !defined(__UABUFFSIZE)
+#define __UABUFFSIZE 32768
 #endif
 
 #include <string>
@@ -40,26 +70,42 @@
 /** File info.
  *
  * Contains the path name and the corresponding md5 hash. 
+ * All calculations are performed during construction. Once 
+ * constructed the object is "const"; there are only accessors.
+ *
+ * The calculation of MD5 requires a char buffer. By default
+ * an internal buffer is used (filei::_buffer which is private).
+ * For concurrent calculations, you can assign filei::_gbuff, filei::_buffc and 
+ * filei::_relbuff to get a buffer, get its capacity and to release
+ * the buffer. Eg. you could set
+ * <pre>
+ *    filei::_gbuff = &::malloc;
+ *    filei::_relbuff = &::free;
+ *    filei::_buffc = 0;
+ * </pre>
+ * If _buffc is 0, then it assumes that all requested memory is returned.
+ * The code checks for _gbuff returning 0 (and catches exceptions) so it is
+ * compatible with malloc and easy to wrap into an allocator as well.
  */
 class filei {
 
    private:
       // a shared buffer
       // used for internal calculations, but can be overridden
-      static char _buffer[32768];
+      static char _buffer[__UABUFFSIZE];
 
       std::string _path; // path name
       unsigned char _md5[16]; // md5 hash
       size_t _h; // hash of hash :)
 
       // calculate hash
-      void calc(bool ic, bool iw, int bs, int max) throw(const char*); 
+      void calc(bool ic, bool iw, size_t bs, int max) throw(const char*); 
 
       // return buffer 
-      static char* gbuff(size_t) { return _buffer; }
+      static void* gbuff(size_t) { return _buffer; }
 
       // return buffer capacity
-      static int buffc() { return 32768; }
+      static size_t buffc() { return __UABUFFSIZE; }
 
    public:
 
@@ -74,7 +120,8 @@ class filei {
        * @param bs buffer size of internal work buffer (default 1024)
        * @throws an error message if construction failed
        */
-      filei(const std::string& path, bool ic, bool iw, int max=0, int bs=1024)
+      filei(const std::string& path, bool ic, bool iw, 
+         int max=0, size_t bs=1024)
       throw(const char*);
 
       /** Get an md5 hash char.
@@ -146,7 +193,8 @@ class filei {
       // assign the three plugins below differently 
       // if you want re-entrant calculations,
       // or different buffer allocation
-      // by default, all calculations share the same buffer
+      // by default, all calculations share the same buffer and
+      // all calculations are performed at construction
 
       /** Function that gets work buffer.
        * The size_t argument is the requested capacity.
@@ -154,20 +202,20 @@ class filei {
        * a static (shared) buffer of size 32K (regardless of the
        * requested capacity).
        */
-      static char* (*_gbuff)(size_t);
+      static void* (*_gbuff)(size_t);
 
       /** Function that tells work buffer capacity.
         * The function should tell the capacity of the
         * buffer returned by (*_gbuff)(size_t).
         */
-      static int (*_buffc)();
+      static size_t (*_buffc)();
 
       /** Function that releases work buffer.
         * This function will be called when a calculation
         * has finished. The argument is the address of the work buffer
         * returned by (*_gbuff)(size_t).
         */
-      static void (*_relbuff)(char*);
+      static void (*_relbuff)(void*);
 };
 
 

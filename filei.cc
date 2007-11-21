@@ -1,12 +1,36 @@
+/*
+ * The contents of this file are subject to the Mozilla Public License
+ * Version 1.1 (the "License"); you may not use this file except in
+ * compliance with the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ * 
+ * Software distributed under the License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ * License for the specific language governing rights and limitations
+ * under the License.
+ * 
+ * The Original Code was developed for an EU.EDGE internal project and
+ * is made available according to the terms of this license.
+ * 
+ * The Initial Developer of the Original Code is Istvan T. Hernadvolgyi,
+ * EU.EDGE LLC.
+ *
+ * Portions created by EU.EDGE LLC are Copyright (C) EU.EDGE LLC.
+ * All Rights Reserved.
+ *
+ * Alternatively, the contents of this file may be used under the terms
+ * of the GNU General Public License (the "GPL"), in which case the
+ * provisions of GPL are applicable instead of those above.  If you wish
+ * to allow use of your version of this file only under the terms of the
+ * GPL and not to allow others to use your version of this file under the
+ * License, indicate your decision by deleting the provisions above and
+ * replace them with the notice and other provisions required by the GPL.
+ * If you do not delete the provisions above, a recipient may use your
+ * version of this file under either the License or the GPL.
+ */
+
 // FILE COMPARISONS BY MD5 HASH VALUE - IMPLEMENTATION
 //
-// (c) Dr. I. T. Hernadvolgyi, EU.EDGE LLC, 2007
-//
-// THIS IS FREE SOFTWARE 
-//
-// FOR DETAILS SEE http://www.gnu.org/licenses/lgpl-3.0.txt
-//
-// THE CALCULATION FOR MD5 USES OPENSSL
 
 #include <filei.h>
 
@@ -20,12 +44,12 @@ extern "C" {
 
 #include <fstream>
 
-char* (*filei::_gbuff)(size_t) = &filei::gbuff;
-int (*filei::_buffc)() = &filei::buffc;
-void (*filei::_relbuff)(char*) = 0;
-char filei::_buffer[32768];
+void* (*filei::_gbuff)(size_t) = &filei::gbuff;
+size_t (*filei::_buffc)() = &filei::buffc;
+void (*filei::_relbuff)(void*) = 0;
+char filei::_buffer[__UABUFFSIZE];
      
-filei::filei(const std::string& path, bool ic, bool iw, int max, int bs)
+filei::filei(const std::string& path, bool ic, bool iw, int max, size_t bs)
 throw(const char*):_path(path),_h(0)  {
    ::bzero(_md5,16); // zero out
    calc(ic,iw,bs,max);
@@ -73,12 +97,20 @@ static int __remove_white(char* buffer, int n) {
    return r;
 }
 
-void filei::calc(bool ic, bool iw, int bn, int max) throw(const char*) {
+void filei::calc(bool ic, bool iw, size_t bn, int max) throw(const char*) {
    
    const char* error = 0;
 
-   char* buffer = (*_gbuff)(bn);   // get buffer
-   bn = std::min(bn,(*_buffc)());  // get buffer size
+   char* buffer = 0;
+   
+   try {
+      buffer= static_cast<char*>((*_gbuff)(bn));   // get buffer
+      if (!buffer) throw 1;
+   } catch(...) {
+      throw "Could not allocate memory";
+   }
+
+   bn = _buffc ? std::min(bn,(*_buffc)()) : bn;  // get buffer size
 
    int tot = 0;
 
@@ -139,8 +171,8 @@ off_t filei::fsize(const std::string& path) throw(const char*) {
 bool filei::md5cmp::operator()(const filei& fi1, const filei& fi2) const {
    if (fi1.h() < fi2.h()) return true;
    else if (fi1.h() > fi2.h()) return false;
-   int i = 0;
-   for(const unsigned char* p1=fi1._md5, *p2=fi2._md5; i< 16; ++i,++p1,++p2) {
+   for(const unsigned char* p1=fi1._md5, *p2=fi2._md5;
+      p1< fi1._md5 + 16; ++p1,++p2) {
       if (*p1 < *p2) return true;
       else if (*p1 > *p2) return false;
    }
@@ -150,8 +182,8 @@ bool filei::md5cmp::operator()(const filei& fi1, const filei& fi2) const {
 
 bool filei::md5eq::operator()(const filei& fi1, const filei& fi2) const {
    if (fi1.h() != fi2.h()) return false;
-   int i = 0;
-   for(const unsigned char* p1=fi1._md5, *p2=fi2._md5; i< 16; ++i,++p1,++p2) {
+   for(const unsigned char* p1=fi1._md5, *p2=fi2._md5;
+      p1< fi1._md5 + 16; ++p1,++p2) {
       if (*p1 != *p2) return false;
    }
    return true;

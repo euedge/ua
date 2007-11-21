@@ -8,7 +8,8 @@ Name: ua (from Hungarian UgyanAz).
 LICENSE:
 =======
 
-LGPL. http://www.gnu.org/licenses/lgpl-3.0.txt
+Mozilla  Public  License, http://www.mozilla.org/MPL/
+Also see the copytight notes in the source files.
 
 BUILD:
 ======
@@ -40,7 +41,7 @@ INSTALL:
   $ make
   $ sudo make install
 
-  Of you want libraries as well,
+  If you want libraries as well,
 
   $ make all
   $ sudo make install

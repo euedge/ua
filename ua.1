@@ -21,9 +21,9 @@ $ \fBfind\fR ~ -type f | \fBua\fR - | \fBwc\fR -l
 .PP
 or to find the largest such set:
 .IP
-$ \fBfind\fR ~ -type f | \fBua\fR - | \\
+$ \fBfind\fR ~ -type f | \fBua\fR -s\fIsep\fR - | \\
 .br
-  \fBawk\fR '{if (NF>M) { M=NF;S=$0;}} END {print(S);}'
+  \fBawk\fR -F\fIsep\fR '{if (NF>M) { M=NF;S=$0;}} END {print(S);}'
 .PP
 
 .SH OPTIONS
@@ -124,7 +124,6 @@ implies \fB\-n\fR, thus file sizes are not grouped. The internal buffer
 size is reduced to 256, since the whitespaces will cause data to be moved
 in the buffer.
 
-
 .TP
 \fBCalculate the number of identical files under home\fR:
 .IP
@@ -133,7 +132,6 @@ $ \fBfind\fR ~ -type f | \fBua\fR -2m256 - | \fBwc\fR -l
 Considering the large number of files, the calculation will be
 performed with a two stage hash (\fB\-2\fR).  Only files that pass the
 256 byte prefix hash will be fully hashed.
-
 
 .TP
 \fBFind identical header files\fR:
@@ -156,7 +154,7 @@ version.
 <istvan.hernadvolgyi@gmail.com>
 .SH LICENSE
 This is free software.  You may redistribute copies of it under the terms of
-the GNU LESSER GENERAL PUBLIC LICENSE <http://www.gnu.org/licenses/lgpl.html>.
+the Mozilla Public License <http://www.mozilla.org/MPL/>.
 There is NO WARRANTY, to the extent permitted by law.
 .SH "SEE ALSO"
 
