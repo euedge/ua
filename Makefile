@@ -16,6 +16,7 @@
 #     uninstall   : removes the files under $(PREFIX)
 #
 
+VERSION=1.0
 PREFIX=/usr/local
 CXX=g++
 CFLAGS= -Wall -O3 -pedantic
@@ -57,4 +58,7 @@ clean:
 	rm -f ./ua ./filei.o ./libfilei.a ./libfilei.so
 
 dist:
-	tar cfz ua.tar.gz ua.cc filei.h filei.cc filei.h Makefile README
+	mkdir ua-$(VERSION)
+	cp ua.cc filei.h filei.cc Makefile README ua.1 ua-$(VERSION)
+	tar cfz ua-$(VERSION).tar.gz ua-$(VERSION)
+	rm -rf ua-$(VERSION)
