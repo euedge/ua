@@ -1,0 +1,13 @@
+Source: ua
+Section: text
+Priority: extra
+Maintainer: Istvan T. Hernadvolgyi <istvan@euedge.com>
+Build-Depends: debhelper (>= 5)
+Standards-Version: 3.7.2
+
+Package: ua
+Architecture: any
+Depends: openssl (>= 0.9.8)
+Description: simple command-line tool that finds sets of identical 
+ files. The name ua is derived from the Hungarian word "ugyanaz" 
+ meaning "the same".
