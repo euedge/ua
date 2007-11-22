@@ -56,3 +56,5 @@ filei.o: filei.cc filei.h
 clean:
 	rm -f ./ua ./filei.o ./libfilei.a ./libfilei.so
 
+dist:
+	tar cfz ua.tar.gz ua.cc filei.h filei.cc filei.h Makefile README
