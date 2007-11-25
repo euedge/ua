@@ -1,4 +1,4 @@
-AC_INIT(ua, 1.0)
+AC_INIT(ua, 1.0, istvan.hernadvolgyi@gmail.com)
 AC_CONFIG_SRCDIR(ua.cc)
 AM_CONFIG_HEADER(config.h)
 AM_INIT_AUTOMAKE
@@ -7,5 +7,7 @@ AC_PROG_CXX
 AC_PROG_INSTALL
 
 AC_CHECK_LIB(crypto, MD5_Init)
+AC_CHECK_LIB(crypto, MD5_Update)
+AC_CHECK_LIB(crypto, MD5_Final)
 
 AC_OUTPUT(Makefile)

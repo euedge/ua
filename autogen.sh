@@ -2,7 +2,7 @@
 # Run this to set up the build system: configure, makefiles, etc.
 # (based on the version in enlightenment's cvs)
 
-package="darkice"
+package="ua"
 
 srcdir=`dirname $0`
 test -z "$srcdir" && srcdir=.

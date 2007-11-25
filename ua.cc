@@ -55,6 +55,10 @@
 
 #include <filei.h>
 
+extern "C" {
+#include <stdio.h>
+}
+
 static char __help[] = 
 "ua [OPTION]... [FILE]...\n\n"
 "where OPTION is\n" 
@@ -151,8 +155,8 @@ static void __phelp(bool v) {
                 << std::endl << std::endl
                 << "Type ua -vh for more help. If in doubt, one of " 
                 << std::endl << std::endl
-                << "$ find ... | au -" << std::endl
-                << "$ find ... | au -2m256 -" << std::endl << std::endl;
+                << "$ find ... | ua -" << std::endl
+                << "$ find ... | ua -2m256 -" << std::endl << std::endl;
    }
    std::cout.flush();
 }
@@ -273,8 +277,17 @@ int main(int argc, char* const * argv) {
 
    // iterate over size groups
    for(fsetc_t::const_iterator fct= files.begin(); fct != files.end(); ++fct) {
+      // less than two in set
       if (fct->second.size() < 2) continue;
+      // exactly two in set, and don't care about printing hash
+      else if (fct->second.size() == 2 && !ph) {
+         if (filei::eq(fct->second[0],fct->second[1],ic,iw,max,BN)) {
+            std::cout << fct->second[0] << sep << fct->second[1] << std::endl;
+         } 
+         continue;
+      }
 
+      // these are still candidates
       fset_t cands(ic,iw,max,BN);
 
       // iterate over same size files

@@ -80,8 +80,10 @@ Calculation proceeds in three steps:
 prefix (given by \fB\-m\fR) of the files with the same byte count 
 and throw away the ones with unique prefix hash values
 .IP
-\fB3\fR. The still matching files will go through a full MD5 hash; the files 
-with the same hash will be deemed identical
+\fB3\fR. If there are exactly two matching files left in a subset after 
+filtering on size and prefix hash, then these two will be compared by byte;
+otherwise the files will go through a full MD5 hash;
+and the ones with the same hash will be deemed identical.
 .PP
 \fB\-w\fR implies \fB\-n\fR, since the byte count is irrelevant information
 in this case. The two-stage hashing algorithm first calculates identical sets

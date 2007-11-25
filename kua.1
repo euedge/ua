@@ -1,0 +1,82 @@
+.TH KUA "1" "November 2007" "kua 1.0" "User Commands"
+.SH NAME
+.TP
+\fBkua\fR \-
+find files which are identical to the given one (comes from the Hungarian
+\fBk\fReresd \fBu\fRgyan\fBa\fRzt \- meaning "find the same")
+
+.SH SYNOPSIS
+.B kua
+[\fIOPTION\fR]... -\fBf\fR <file> [\fIFILE\fR]...
+
+.SH DESCRIPTION
+
+\fBkua\fR will look for files which are identical to the one given as the
+argument of -\fBf\fR. The files found will be printed on separate lines.
+
+.SH OPTIONS
+.TP
+\fB\-i\fR
+ignore letter case
+.TP
+\fB\-w\fR
+ignore white spaces
+.TP
+\fB\-n\fR
+do not ask the file system for file size
+.TP
+\fB\-v\fR
+verbose output (prints stuff to stderr), verbose help
+.TP
+\fB\-b\fR \fIsize\fR
+set internal buffer size (default 1024)
+.TP
+\fB\-h\fR
+this help (\fB-vh\fR more verbose help)
+.TP
+\fB\-\fR
+read file names from stdin, where each line contains one file name (this 
+must also be the last option in the list)
+
+.SH OUTPUT
+The files found will be printed on separate lines.
+
+.SH EXAMPLES
+.TP
+\fBGet help on usage\fR:
+.IP
+$ \fBkua\fR -h
+.br
+$ \fBkua\fR -vh
+.PP
+
+.TP
+\fBFind the files identical to fav.mpg under home\fR:
+.IP
+$ \fBfind\fR ~ -type f | \fBkua\fR -f ~/music/fav.mpg -
+.PP
+Only files which have the same size (according to the FS) will be considered.
+
+.TP
+\fBFind files identical to x.h, ignoring white spaces\fR:
+.IP
+$ \fBfind\fR ~/code -name '*.h' | \fBkua\fR -b256 -wf ~/code/X/x.h -
+.PP
+Since the comparison ignores white spaces, use a smaller buffer (of 256 bytes).
+White space ignoring comparison will not care about the file size and thus it
+is significantly slower.
+
+.SH VERSION
+1.0
+
+.SH AUTHOR
+\(co Istv\*'an T. Hern\*'adv\*"olgyi, EU.EDGE LLC, 2007
+.br
+<istvan.hernadvolgyi@gmail.com>
+.SH LICENSE
+This is free software.  You may redistribute copies of it under the terms of
+the Mozilla Public License <http://www.mozilla.org/MPL/>.
+There is NO WARRANTY, to the extent permitted by law.
+.SH "SEE ALSO"
+
+\fIua\fR(1), \fIMD5\fR(3), \fImd5sum\fR(1), \fIfind\fR(1)

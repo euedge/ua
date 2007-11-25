@@ -99,7 +99,7 @@ class filei {
       size_t _h; // hash of hash :)
 
       // calculate hash
-      void calc(bool ic, bool iw, size_t bs, int max) throw(const char*); 
+      void calc(bool ic, bool iw, size_t bs, size_t m) throw(const char*); 
 
       // return buffer 
       static void* gbuff(size_t) { return _buffer; }
@@ -116,12 +116,12 @@ class filei {
        * @param path file name
        * @param ic ignore case
        * @param iw ignore white space (in essence, remove it)
-       * @param max consider at most these many bytes for the hash (0: ALL)
+       * @param m consider at most these many bytes for the hash (0: ALL)
        * @param bs buffer size of internal work buffer (default 1024)
        * @throws an error message if construction failed
        */
       filei(const std::string& path, bool ic, bool iw, 
-         int max=0, size_t bs=1024)
+         size_t m = 0ul, size_t bs=1024ul)
       throw(const char*);
 
       /** Get an md5 hash char.
@@ -154,6 +154,20 @@ class filei {
         * @throws an exception if status cannot be determined.
         */
       static off_t fsize(const std::string& path) throw(const char*);
+
+      /** Determine whether the two files are identical.
+        * @param p1 path of one file
+        * @param p2 path of the other
+        * @param ic ignore letter case
+        * @param iw ignore white spaces
+        * @param m onlu consider these many bytes (0 all)
+        * @param bs set the internal buffer size
+        * @return whether the files corresponding to p1 and p2 are identical
+        * @throws an exception on any error
+        */
+      static bool eq(const std::string& p1, const std::string& p2,
+         bool ic, bool iw, size_t m = 0ul, size_t bs = 1024ul)
+      throw(const char*);
 
       /** Functor for hashed containers.
        */
@@ -263,8 +277,8 @@ class fset {
 
       bool _ic; // ignore case
       bool _iw; // ignore whitespace
-      int _max; // max chars to consider
-      int _bs;  // buffer size
+      size_t _max; // max chars to consider
+      size_t _bs;  // buffer size
 
       typedef typename M::const_iterator it_t; // subset iterator
 
@@ -284,11 +298,11 @@ class fset {
        *
        * @param ic ignore case
        * @param iw ignore white space
-       * @param max consider at most these many bytes for hash (0: ALL)
+       * @param m consider at most these many bytes for hash (0: ALL)
        * @param bs internal buffer size (default 1024)
        */
-      fset(bool ic, bool iw, int max = 0, int bs = 1024):
-         _ic(ic), _iw(iw), _max(max), _bs(bs) {
+      fset(bool ic, bool iw, size_t m = 0, size_t bs = 1024):
+         _ic(ic), _iw(iw), _max(m), _bs(bs) {
       }
 
  
@@ -350,13 +364,13 @@ class fset {
        * @param cmn common set of files
        * @param ic ignore case
        * @param iw ignore white space
-       * @param max consider at most these many bytes for hash (0: ALL)
+       * @param m consider at most these many bytes for hash (0: ALL)
        * @param bs internal buffer size (default 1024)
        */
       static void common(M& res, const M& cmn, 
-         bool ic, bool iw, int max=0, int bs=1204) {
+         bool ic, bool iw, size_t m=0, size_t bs=1204) {
          for(it_t it=cmn.begin(); it != cmn.end(); ++it) {
-            fset files(ic,iw,max,bs);
+            fset files(ic,iw,m,bs);
             files.add(it->first.path());
             for(int i=0; i<(int)it->second.size();++i) files.add(it->second[i]);
 
