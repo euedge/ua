@@ -141,7 +141,6 @@ void filei::calc(bool ic, bool iw, size_t bn, size_t m) throw(const char*) {
          } else tot += n;
       }
 
-      for(int x=0; x<n; ++x) std::cout << buffer[x];
       if (!MD5_Update(&ctxt,buffer,n)) { 
           error = "MD5 calc error"; 
           goto FINALLY; 
