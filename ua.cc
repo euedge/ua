@@ -281,7 +281,7 @@ int main(int argc, char* const * argv) {
       if (fct->second.size() < 2) continue;
       // exactly two in set, and don't care about printing hash
       else if (fct->second.size() == 2 && !ph) {
-         if (filei::eq(fct->second[0],fct->second[1],ic,iw,max,BN)) {
+         if (filei::eq(fct->second[0],fct->second[1],ic,iw,0,BN)) {
             std::cout << fct->second[0] << sep << fct->second[1] << std::endl;
          } 
          continue;
