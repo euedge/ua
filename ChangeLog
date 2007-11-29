@@ -1,3 +1,6 @@
 1.0
 
 	o initial release
+
+1.01
+	o bug fix in 1.0 regarding 2 stage hashing
